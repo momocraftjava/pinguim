@@ -80,3 +80,10 @@ body {
       align-items: center;
       box-shadow: 0 1px 5px rgba(0,0,0,0.1);
     }
+
+.editCd {
+    color: #1976d2;
+  margin-bottom: 10px;
+  font-weight: bold;
+  text-align: center;
+}

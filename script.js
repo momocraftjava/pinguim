@@ -26,7 +26,8 @@ function saveCadastros(cadastros) {
 // cria um cadastro 1
 function addCadastro(nome, email) {
   const cadastros = getCadastros();
-  cadastros.push({ nome, email });
+   const id = Date.now(); // gera id aleatorio baseado na hora e data 
+  cadastros.push({id, nome, email });
   saveCadastros(cadastros);
 }
 
@@ -36,26 +37,77 @@ function deleteCadastro(index) {
   cadastros.splice(index, 1);
   saveCadastros(cadastros);
 }
+//edita cadastro NESSA PORRA (fuunçao :) )
+function editCadastro(id, novoNome, novoEmail) {
+  const cadastros = getCadastros();
+  const index = cadastros.findIndex(c => c.id === id);
 
-//mostra a array na tela
+  if (index !== -1) {
+    cadastros[index].nome = novoNome;
+    cadastros[index].email = novoEmail;
+    saveCadastros(cadastros);
+  }
+}
+
+
+//RENDERIZA A LISTA NA TELA 
 function renderCadastros() {
   const lista = document.getElementById("listaCadastros");
   lista.innerHTML = "";
 
   getCadastros().forEach(cadastro => {
     const li = document.createElement("li");
+
+    // PRIMEIRA EXIBIÇÃO
     li.innerHTML = `
-      ${cadastro.nome} - ${cadastro.email}
-      <button onclick="handleDelete(${cadastro.id})">Excluir</button>
+      <span class="nome">${cadastro.nome}</span> -
+      <span class="email">${cadastro.email}</span>
+      <button class="editar">Editar</button>
+      <button class="excluir">Excluir</button>
     `;
+
+    // CRIA BOTAOZINHO DELETE
+    li.querySelector(".excluir").addEventListener("click", () => {
+      deleteCadastro(cadastro.id);
+      renderCadastros();
+    });
+
+    // EDIÇ~SOAOOOO
+    li.querySelector(".editar").addEventListener("click", () => {
+      
+      li.innerHTML = `
+
+         <h3 class="editCd">EDITAR</h3>
+          
+        <input type="text" class="edit-nome" value="${cadastro.nome}">
+        <input type="email" class="edit-email" value="${cadastro.email}">
+        <button class="salvar">Salvar</button>
+        <button class="cancelar">Cancelar</button>
+      `;
+
+      // SAVE EDITION
+      li.querySelector(".salvar").addEventListener("click", () => {
+        const novoNome = li.querySelector(".edit-nome").value;
+        const novoEmail = li.querySelector(".edit-email").value;
+
+        editCadastro(cadastro.id, novoNome, novoEmail);
+        renderCadastros(); 
+      });
+
+      // FUNCTION BOTAO DE DCANCELAR EDIÇAO
+      li.querySelector(".cancelar").addEventListener("click", () => {
+        renderCadastros(); // Volta ao modo normal
+      });
+    });
+
     lista.appendChild(li);
   });
 }
-///funçao pro botao funcionar
+///funçao pro botao funcionar (DELETE)
 function handleDelete(id) {
   deleteCadastro(id);
   renderCadastros();
 }
 
-// Render inicial ao abrir a página
+// FUNCIONA CODIGO
 renderCadastros();
