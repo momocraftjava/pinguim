@@ -1,43 +1,27 @@
-document.getElementById("formCadastro").addEventListener("submit", (e) => {
-
-  e.preventDefault();
-
-  const nome = document.getElementById("nome").value;
-  const email = document.getElementById("email").value;
-
-  addCadastro(nome, email);
-
-  renderCadastros();
-
-  e.target.reset();
-});
-
-
-//mostra uma array pro pc
+// CRIA DB
 function getCadastros() {
   return JSON.parse(localStorage.getItem("cadastros")) || [];
 }
+//CRIA OBJETO
+function addCadastro(nome, email) {
+  const cadastros = getCadastros();
+  const id = Date.now(); // cria id apartir da data e hora
+  cadastros.push({ id, nome, email });
+  saveCadastros(cadastros);
+}
 
-// 
+//SALVA UM CADASTRO OU ALTERAÇAO
 function saveCadastros(cadastros) {
   localStorage.setItem("cadastros", JSON.stringify(cadastros));
 }
 
-// cria um cadastro 1
-function addCadastro(nome, email) {
-  const cadastros = getCadastros();
-   const id = Date.now(); // gera id aleatorio baseado na hora e data 
-  cadastros.push({id, nome, email });
+// FUNÇAO DE DELETAR
+function deleteCadastro(id) {
+  let cadastros = getCadastros();
+  cadastros = cadastros.filter(c => c.id !== id);
   saveCadastros(cadastros);
 }
-
-//deleta um cadastro 
-function deleteCadastro(index) {
-  const cadastros = getCadastros();
-  cadastros.splice(index, 1);
-  saveCadastros(cadastros);
-}
-//edita cadastro NESSA PORRA (fuunçao :) )
+//FUNÇAO DE EDITAR
 function editCadastro(id, novoNome, novoEmail) {
   const cadastros = getCadastros();
   const index = cadastros.findIndex(c => c.id === id);
@@ -48,66 +32,112 @@ function editCadastro(id, novoNome, novoEmail) {
     saveCadastros(cadastros);
   }
 }
+// FUNÇAO DE BUSCCA
+function buscarCadastros(termo) {
+  const cadastros = getCadastros();
+  termo = termo.toLowerCase();
+  return cadastros.filter(c => c.nome.toLowerCase().includes(termo));
+}
 
-
-//RENDERIZA A LISTA NA TELA 
+// MSOTRA TELA
 function renderCadastros() {
   const lista = document.getElementById("listaCadastros");
   lista.innerHTML = "";
 
   getCadastros().forEach(cadastro => {
     const li = document.createElement("li");
-
-    // PRIMEIRA EXIBIÇÃO
     li.innerHTML = `
-      <span class="nome">${cadastro.nome}</span> -
-      <span class="email">${cadastro.email}</span>
+      <span>${cadastro.nome}</span> - <span>${cadastro.email}</span>
       <button class="editar">Editar</button>
       <button class="excluir">Excluir</button>
     `;
 
-    // CRIA BOTAOZINHO DELETE
+    li.querySelector(".editar").addEventListener("click", () => {
+      // Ativa o modo de edição
+      document.getElementById("editId").value = cadastro.id;
+      document.getElementById("nome").value = cadastro.nome;
+      document.getElementById("email").value = cadastro.email;
+      document.getElementById("btnPrincipal").textContent = "Salvar Edição";
+      document.getElementById("btnCancelarEdicao").style.display = "inline";
+    });
+
     li.querySelector(".excluir").addEventListener("click", () => {
       deleteCadastro(cadastro.id);
       renderCadastros();
     });
 
-    // EDIÇ~SOAOOOO
+    lista.appendChild(li);
+  });
+}
+
+// ===== EVENTOS =====
+document.getElementById("formCadastro").addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const nome = document.getElementById("nome").value;
+  const email = document.getElementById("email").value;
+  const editId = document.getElementById("editId").value;
+
+  if (editId) {
+    
+    editCadastro(Number(editId), nome, email);
+    document.getElementById("btnPrincipal").textContent = "Cadastrar";
+    document.getElementById("btnCancelarEdicao").style.display = "none";
+    document.getElementById("editId").value = "";
+  } 
+  else {
+
+    addCadastro(nome, email);
+  }
+
+  e.target.reset();
+  renderCadastros();
+});
+
+// BOTAO DE CANCELAR EDIT
+document.getElementById("btnCancelarEdicao").addEventListener("click", () => {
+  document.getElementById("formCadastro").reset();
+  document.getElementById("btnPrincipal").textContent = "Cadastrar";
+  document.getElementById("btnCancelarEdicao").style.display = "none";
+  document.getElementById("editId").value = "";
+});
+// BOTAO DE BUSCA
+document.getElementById("busca").addEventListener("input", (e) => {
+  const termo = e.target.value.trim(); //cria variavel prov de acordo com oq o usuario digita
+  const lista = document.getElementById("listaCadastros");
+  lista.innerHTML = "";
+
+  const resultados = termo ? buscarCadastros(termo) : getCadastros(); //if
+
+  resultados.forEach(cadastro => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span>${cadastro.nome}</span> - <span>${cadastro.email}</span>
+      <button class="editar">Editar</button>
+      <button class="excluir">Excluir</button>
+    `;
+    //BOTAO DE EDITAR
     li.querySelector(".editar").addEventListener("click", () => {
-      
-      li.innerHTML = `
+      document.getElementById("editId").value = cadastro.id;
+      document.getElementById("nome").value = cadastro.nome;
+      document.getElementById("email").value = cadastro.email;
+      document.getElementById("btnPrincipal").textContent = "Salvar Edição";
+      document.getElementById("btnCancelarEdicao").style.display = "inline";
+    });
 
-         <h3 class="editCd">EDITAR</h3>
-          
-        <input type="text" class="edit-nome" value="${cadastro.nome}">
-        <input type="email" class="edit-email" value="${cadastro.email}">
-        <button class="salvar">Salvar</button>
-        <button class="cancelar">Cancelar</button>
-      `;
-
-      // SAVE EDITION
-      li.querySelector(".salvar").addEventListener("click", () => {
-        const novoNome = li.querySelector(".edit-nome").value;
-        const novoEmail = li.querySelector(".edit-email").value;
-
-        editCadastro(cadastro.id, novoNome, novoEmail);
-        renderCadastros(); 
-      });
-
-      // FUNCTION BOTAO DE DCANCELAR EDIÇAO
-      li.querySelector(".cancelar").addEventListener("click", () => {
-        renderCadastros(); // Volta ao modo normal
-      });
+    li.querySelector(".excluir").addEventListener("click", () => {
+      deleteCadastro(cadastro.id);
+      renderCadastros();
     });
 
     lista.appendChild(li);
   });
-}
-///funçao pro botao funcionar (DELETE)
-function handleDelete(id) {
-  deleteCadastro(id);
+});
+document.getElementById("btnLimparBusca").addEventListener("click", () => {
+  const campoBusca = document.getElementById("busca");
+  campoBusca.value = "";
   renderCadastros();
-}
+});
 
-// FUNCIONA CODIGO
+
 renderCadastros();

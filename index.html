@@ -8,18 +8,26 @@
     <title>Pinguim</title>
 </head>
 <body>
-     <h1>Cadastro</h1>
+    <h1>Cadastro</h1>
 
-  <form id="formCadastro">
-        <p> Insira seu nome</p>
-    <input type="text" id="nome" placeholder="Nome" required>
-        <p> Insira seu email</p>
-    <input type="email" id="email" placeholder="Email" required>
-    <button type="submit">Cadastrar</button>
-  </form>
-  <h1>Lista de cadastro</h1>
-  
-  <ul id="listaCadastros"></ul>
+<form id="formCadastro">
+  <input type="hidden" id="editId"> <!-- guarda o ID do item sendo editado -->
+  <input type="text" id="nome" placeholder="Nome" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <button type="submit" id="btnPrincipal">Cadastrar</button>
+  <button type="button" id="btnCancelarEdicao" style="display:none;">Cancelar Edição</button>
+</form>
+
+<h1>Lista de Cadastros</h1> 
+
+  <div class="container-busca">
+  <input type="text" id="busca" placeholder="Buscar por nome...">
+  <button id="btnLimparBusca">Limpar</button>
+</div>
+
+
+<ul id="listaCadastros"></ul>
+
   
 
 </body>
